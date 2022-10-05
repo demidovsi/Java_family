@@ -1,0 +1,32 @@
+[
+        {
+                "name": "Домашняя база",
+                "url": "http://127.0.0.1:5001/",
+                "schema_name": "family",
+                "info_code": "nsi",
+                "interval": 30,
+                "url_login": "http://127.0.0.1:5001/",
+                "user_name": "superadmin",
+                "password": "Kirill!981"
+        },
+        {
+                "name": "Облачная база",
+                "url": "http://159.223.0.234:5000/",
+                "schema_name": "family",
+                "info_code": "nsi",
+                "interval": 30,
+                "url_login": "http://127.0.0.1:3000/",
+                "user_name": "superadmin",
+                "password": "Kirill!981"
+        },
+        {
+                "name": "Rashod",
+                "url": "http://127.0.0.1:5000/",
+                "schema_name": "family",
+                "info_code": "nsi",
+                "interval": 30,
+                "url_login": "http://127.0.0.1:3000/",
+                "user_name": "SUPERADMIN",
+                "password": "Kirill!981"
+        }
+]

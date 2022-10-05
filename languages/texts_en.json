@@ -1,0 +1,95 @@
+{
+"main": [
+    {"id": -1, "text": "Family expenses (Java)"},
+    {"id": 0, "text": "Initiation of the 'Family expenses' program"},
+    {"id": 1, "text": "Set font"},
+    {"id": 2, "text": "Choice of language"},
+    {"id": 3, "text": "Choose"},
+    {"id": 4, "text": "Error"},
+    {"id": 5, "text": "By default are used"},
+    {"id": 6, "text": "Exit"},
+    {"id": 7, "text": "End of the program"},
+    {"id": 8, "text": "Console"},
+    {"id": 9, "text": "Additionally"},
+    {"id": 12, "text": "Close"},
+    {"id": 13, "text": "Refresh"},
+    {"id": 14, "text": "Expand everything"},
+    {"id": 15, "text": "Collapse all"},
+    {"id": 16, "text": "Confirmation"},
+  {"id": 17, "text": "Close application ?"},
+  {"id": 18, "text": "Connection configuration correction"}
+],
+"form": [
+    {"id": 1, "text": "Reading configuration"},
+    {"id": 2, "text": "Time"},
+    {"id": 4, "text": "Create a new application and\ndatabase schema for it"},
+    {"id": 5, "text": "Choose an application for work"},
+    {"id": 7, "text": "Summary costs"},
+    {"id": 8, "text": "Per diem expenses"},
+    {"id": 11, "text": "Connecting with DB Settings"},
+    {"id": 12, "text": "Parameter Configuration for REST API Connection"},
+    {"id": 20, "text": "Set the code of the technological system (application)"},
+    {"id": 21, "text": "Set the application database schema code"},
+    {"id": 22, "text": "Specify the name of the technological system (application)"},
+    {"id": 23, "text": "Technological system name"},
+    {"id": 24, "text": "Really uninstall the app"},
+    {"id": 25, "text": "and database schema"},
+    {"id": 26, "text": "Deleting an app"}
+],
+"rest": [
+    {"id": 5, "text": "Save to file"},
+    {"id": 6, "text": "Load from file"},
+    {"id": 14, "text": "Generate XML"},
+    {"id": 15, "text": "REST API connection configurations"},
+    {"id": 16, "text": "Configuration:   "}
+    ],
+  "language": [
+    {"id": 1, "text": "Choice of language for the program"},
+    {"id": 2, "text": "Set selected language"},
+    {"id": 3, "text": "Close the form without changing the language"}
+
+  ],
+  "log": [
+    {"id": 2, "text": "Day"}
+      ],
+  "hist": [
+    {"id": 5, "text": "Day"},
+    {"id": 8, "text": "Today"},
+    {"id": 10, "text": "Read"}
+  ],
+"one": [
+    {"id": 1, "text": "Expense date"},
+    {"id": 2, "text": "Expense"},
+    {"id": 3, "text": "Expense type"},
+    {"id": 4, "text": "Comment"},
+    {"id": 5, "text": "Total"},
+    {"id": 6, "text": "Save"},
+    {"id": 7, "text": "Current month"},
+    {"id": 8, "text": "Current year"},
+    {"id": 9, "text": "Interval"},
+    {"id": 10, "text": "Year"},
+    {"id": 11, "text": "Month"},
+    {"id": 12, "text": "New"},
+    {"id": 13, "text": "Delete"}
+],
+"months": [
+    {"id": 1, "text": "January"},
+    {"id": 2, "text": "February"},
+    {"id": 3, "text": "March"},
+    {"id": 4, "text": "April"},
+    {"id": 5, "text": "May"},
+    {"id": 6, "text": "June"},
+    {"id": 7, "text": "July"},
+    {"id": 8, "text": "August"},
+    {"id": 9, "text": "September"},
+    {"id": 10, "text": "October"},
+    {"id": 11, "text": "November"},
+    {"id": 12, "text": "December"}
+],
+  "summary": [
+    {"id": 1, "text": "Plot"},
+    {"id": 2, "text": "Plot of expenses by categories"},
+    {"id": 3, "text": "Categories of expenses"},
+    {"id": 4, "text": "Expenses"}
+  ]
+}
