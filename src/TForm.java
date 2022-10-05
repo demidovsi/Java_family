@@ -1,37 +1,39 @@
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.prefs.Preferences;
+import java.util.*;
 
 public class TForm extends JFrame {
-    private static JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP); // Панель с вкладками
+    private final JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP); // Панель с вкладками
     private static Summary panelSumma;
-    private Preferences userPrefs;
-    private UserLanguages languages;
+    private final Preferences userPrefs;
+    private final UserLanguages languages;
     private ChooseConfig chooseConfig;
     private ChooseLanguage chooseLanguage;
-    private JButton self = new JButton();
+    private final JButton self = new JButton();
     private JMenu console, compliment;
+    private static JButton createApp; // кнопка создания новой схемы БД
+    private final JLabel statusBar = new JLabel("");
     private JMenuItem font, lang, exit, config;
-    private JButton parentForm;
+    private final JComboBox apps = new JComboBox();
+    private String token;
+    private static RestAPI restAPI;
+    private CheckConnection checkConnection;
+    private static boolean exist;
 //--------------------------------------------------------
     /* Конструктор класса */
-    public TForm(UserLanguages lang, Preferences user, JButton parentObject)
+    public TForm(UserLanguages lang, Preferences user)
     {
         super("");
-        parentForm = parentObject;
         userPrefs = user;
         languages = lang;
-        RestAPI restApi = new RestAPI(userPrefs);
-        // ------------------------
-        restApi.get("MDMProxy.Inform", "", "", true, "");
-        if (restApi.isOk()) {
-            System.out.print("Okey: ");
-            System.out.println(restApi.getResponseMessage());
-        } else {
-            System.out.print("Error " + Integer.toString(restApi.getResponseCode()) + ": ");
-            System.out.println(restApi.getResponseMessage());
-        };
+        statusBar.setForeground(Color.red);
+        restAPI = new RestAPI(userPrefs);
+//        makeLogin();
         // --------------------------
         setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
         // Создание строки главного меню
@@ -45,11 +47,29 @@ public class TForm extends JFrame {
         panelSumma.setUserPreferences(userPrefs);
         panelSumma.refresh();
         tabs.addTab("", panelSumma);
-        add(tabs);
 
         JPanel panelOne = new JPanel();
         tabs.addTab("", panelOne);
-        // Подключаем меню к интерфейсу приложения
+
+        add(tabs, BorderLayout.CENTER);
+// панель кнопок управления
+        createApp = new JButton();
+        apps.setEditable(false);
+        apps.setMaximumRowCount(20);
+
+        JPanel panelButtons = new JPanel();
+        panelButtons.add(createApp, "North");
+        panelButtons.add(apps, BorderLayout.NORTH);
+
+        JPanel panelStatusBar = new JPanel();
+        panelStatusBar.add(statusBar, BorderLayout.SOUTH);
+
+        JPanel panelCommon = new JPanel();
+        panelCommon.add(panelButtons, BorderLayout.NORTH);
+        panelCommon.add(panelStatusBar, BorderLayout.SOUTH);
+        add(panelCommon, BorderLayout.SOUTH);
+
+// Подключаем меню к интерфейсу приложения
         setJMenuBar(menuBar);
         addWindowListener(new WindowListener() {
                 public void windowActivated(WindowEvent event) {}
@@ -76,21 +96,44 @@ public class TForm extends JFrame {
         );
         //
         self.addActionListener((e) -> {
-            changeLanguage();
-            // передать наверх
-            ActionEvent event = new ActionEvent(parentForm, Event.F2, "changeLanguage");
-            ActionListener[] listeners;
-            listeners = parentForm.getActionListeners();
-            listeners[0].actionPerformed(event);
+            if (e.getID() == Event.F2) changeLanguage();  // смена языка
+            if (e.getID() == Event.F3) statusBar.setText(e.getActionCommand());  // смена состояния соединения с БД
+            if (e.getID() == Event.F4) {  // смена базы или версии
+                setTitle(languages.getText("main", -1, "Расходы семьи (Java)") + " " + e.getActionCommand());
+            }
+            if (e.getID() == Event.F5) makeLogin();  // восстановление соединения
+            if (e.getID() == Event.F6) {
+                checkConnection.needStop = true;
+                makeLogin();
+                checkConnection = new CheckConnection(restAPI, self, new UnitConfig(userPrefs).getIntervalConnection());
+                checkConnection.start();
+            }
         });
         changeLanguage();
-        // Открытие окна
+// Открытие окна
         setVisible(true);
+// поток контроля соединения
+        checkConnection = new CheckConnection(restAPI, self, new UnitConfig(userPrefs).getIntervalConnection());
+        checkConnection.start();
     }
     public void makeSize() {
         /*        Загрузка геометрии и топологии         */
         setLocation(userPrefs.getInt("main_left", 100), userPrefs.getInt("main_top", 50));
         setSize(userPrefs.getInt("main_width", 1200), userPrefs.getInt("main_height", 800));
+    }
+    public void makeLogin(){
+        restAPI.login();
+        if (restAPI.isOk()) {
+            JSONObject st = new JSONObject(restAPI.getResponseMessage());
+            token = st.getString("accessToken");
+            System.out.println("token=" + token);
+            loadApp(restAPI);
+        }
+        else {
+            token = null;
+            System.out.println("login ERROR: " + Integer.toString(restAPI.getResponseCode()) + " = " +
+                    restAPI.getResponseMessage());
+        }
     }
     private void saveSize() {
         /*        Спасение геометрии и топологии         */
@@ -126,14 +169,15 @@ public class TForm extends JFrame {
     private JMenu createOptions() {
         compliment = new JMenu("");
         config = new JMenuItem();
-        config.addActionListener((e) -> {chooseConfig = new ChooseConfig(languages, userPrefs); chooseConfig.makeSize();});
+        config.addActionListener((e) -> {chooseConfig = new ChooseConfig(languages, userPrefs, self);
+            chooseConfig.makeSize();});
 // Добавление к пункту меню
         compliment.add(config);
         return compliment;
     }
     private void reSend(JFrame form, JButton self, String command){
         if (form != null) {
-            ActionEvent event = new ActionEvent(parentForm, Event.F2, "changeLanguage");
+            ActionEvent event = new ActionEvent(form, Event.F2, command);
             ActionListener[] listeners;
             listeners = self.getActionListeners();
             listeners[0].actionPerformed(event);
@@ -152,6 +196,30 @@ public class TForm extends JFrame {
         reSend(chooseConfig, chooseConfig.self, "changeLanguage");
         tabs.setTitleAt(0, languages.getText("form", 7, "Сводные расходы"));
         tabs.setTitleAt(1, languages.getText("form", 8,"Суточные расходы"));
+        createApp.setText(languages.getText("one", 12,"Создать"));
+        createApp.setToolTipText(languages.getText("form", 4,"Создать новую систему и схему базы данных"));
         panelSumma.changeLanguage();
+    }
+    private void loadApp(RestAPI restAPI){
+        if (token != null) {
+            restAPI.get("v1/app?token=" + token);
+            if (restAPI.isOk()) {
+                exist = false;
+                int index = apps.getSelectedIndex();
+                apps.removeAllItems();
+                JSONArray units = new JSONArray(restAPI.getResponseMessage());
+                UnitConfig unitConfig = new UnitConfig(userPrefs);
+                String currentSchemaName = unitConfig.getSchemaName();
+                String st, schemaName;
+                for (int i = 0; i < units.length(); i++) {
+                    schemaName = units.getJSONObject(i).getString("code");
+                    st = "(" + schemaName + ") " + units.getJSONObject(i).getString("description");
+                    apps.addItem(st);
+                    if (currentSchemaName.equals(schemaName)) index = i;
+                }
+                exist = true;
+                apps.setSelectedIndex(index);
+            }
+        }
     }
 }

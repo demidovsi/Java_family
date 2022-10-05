@@ -8,18 +8,18 @@ import java.util.prefs.Preferences;
 
 public class UnitConfig {
     public static String currentNameConfig;  // имя текущей конфигурации
-    private String url, userName, password, infoCode, schemaName;
+    private String url, userName, password, schemaName, infoCode;
     private int intervalConnection;
     public UnitConfig(Preferences user)
     {
-        currentNameConfig = user.get("current_config", "Облачная база");
+        currentNameConfig = user.get("current_config", "Домашняя база");
         Path path = Paths.get("config.json");
         if (Files.exists(path)) {
             try {
                 String contents = new String(Files.readAllBytes(path));
                 contents = contents.trim();
                 // убираем [ в начале и ] в конце
-                if (contents.charAt(0) == '[') {contents = contents.substring(1, contents.length() - 1);};
+                if (contents.charAt(0) == '[') {contents = contents.substring(1, contents.length() - 1);}
                 contents = "{\"configs\": [" + contents + "]}";
                 JSONObject st = new JSONObject(contents);
                 JSONArray configs = st.getJSONArray("configs");
@@ -36,20 +36,20 @@ public class UnitConfig {
                     }
                 }
 
-            } catch (Exception e) {}
+            } catch (Exception e) {System.out.println("Error UnitConfig");}
         }
     }
     public String getUrl() {return url;}
     public String getUserName() {return userName;}
     public String getPassword() {return password;}
-    public String getInfoCode() {return infoCode;}
     public String getSchemaName() {return schemaName;}
+    public String getInfoCode() {return infoCode;}
     public int getIntervalConnection() {return intervalConnection;}
 
     public void setUrl(String val) {url = val;}
     public void setUserName(String val) {userName = val;}
     public void setPassword(String val) {password = val;}
-    public void setInfoCode(String val) {infoCode = val;}
     public void setSchemaName(String val) {schemaName = val;}
+    public void setInfoCode(String val) {infoCode = val;}
     public void setIntervalConnection(int val) {intervalConnection = val;}
 }

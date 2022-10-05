@@ -1,10 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.util.Calendar;
-import java.util.Vector;
 import java.util.prefs.Preferences;
-import com.toedter.calendar.*;
 import com.toedter.components.JSpinField;
 
 public class Summary extends PatternForm {
@@ -15,7 +12,6 @@ public class Summary extends PatternForm {
     JCheckBox graph;
     int current_year, current_month, current_day;
     public void createGUI(){
-        System.out.println("createGUI");
 // панель кнопок управления
         JPanel panelButton1 = new JPanel();
         GridLayout layout1 = new GridLayout(0, 7, 5, 0);
@@ -70,6 +66,7 @@ public class Summary extends PatternForm {
                 case 0: {current.setText(languages.getText("hist", 8, "Сегодня")); break;}
                 case 1: {current.setText(languages.getText("one", 7, "Текущий месяц")); break;}
                 case 2: {current.setText(languages.getText("one", 8, "Текущий год")); break;}
+                default: break;
             }
 
             index = months.getSelectedIndex();
@@ -92,13 +89,11 @@ public class Summary extends PatternForm {
     }
     public void refresh() {
         if (userPrefs != null) {
-            System.out.println("refresh");
             intervalChanged();
         }
     }
     private void intervalChanged(){
         if (exist) {
-            System.out.println("intervalChanged");
             int index = intervals.getSelectedIndex();
             months.setVisible(index == 0 || index == 1);
             day.setVisible(index == 0);

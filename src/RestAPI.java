@@ -1,24 +1,63 @@
-import javax.net.*;
-//import java.io.InputStreamReader;
-//import java.net.URL;
-//import java.net.HttpURLConnection;
 import java.util.prefs.Preferences;
-//import java.io.BufferedReader;
 import java.net.*;
 import java.io.*;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RestAPI {
-    private Preferences userPreferences;
+    private final Preferences userPreferences;
     private int responseCode;
     private String responseMessage;
+    private UnitConfig unitConfig;
     public RestAPI(Preferences user){
         userPreferences = user;
-    };
-    public String get(String mes, String param, String language,  boolean showError, String tokenUser) {
+    }
+    public String getUrl() {
+        if (unitConfig == null) unitConfig = new UnitConfig(userPreferences);
+        return unitConfig.getUrl();
+    }
+    public void login(){
+        unitConfig = new UnitConfig(userPreferences);
+        String text = "{\"login\": \"" + unitConfig.getUserName() +
+                "\", \"password\": \"" + unitConfig.getPassword() + "\"}";
+        text = "{\"params\": " + text + "}";
         try {
-            UnitConfig unitConfig = new UnitConfig(userPreferences);
-            final URL url = new URL(unitConfig.getUrl() + mes);
-            final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            URL url = new URL(unitConfig.getUrl() + "v1/login");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            try {
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setConnectTimeout(30000);
+                con.setReadTimeout(30000);
+                con.setDoOutput(true);
+                try (OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream())) {
+                    writer.write(text);
+                }
+                if (con.getResponseCode() != 200) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = con.getResponseMessage();
+                    System.err.println("connection failed");
+                }
+                try(BufferedReader reader = new BufferedReader(
+//                        new InputStreamReader(con.getInputStream(), Charset.forName("utf-8")))) {
+                        new InputStreamReader(con.getInputStream()))) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = Optional.of(reader.lines().collect(Collectors.joining(System.lineSeparator()))).get();
+                }
+                } catch (final Exception ex) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = con.getResponseMessage();
+                }
+        } catch (final Exception ex) {
+            responseCode = -1;
+            responseMessage = "Нет соединения с сервером";
+        }
+    }
+    public void get(String mes) {
+        if (unitConfig == null) unitConfig = new UnitConfig(userPreferences);
+        try {
+            URL url = new URL(unitConfig.getUrl() + mes);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json");
             con.setConnectTimeout(100);
@@ -35,17 +74,13 @@ public class RestAPI {
                     content.append(inputLine);
                 }
                 responseMessage = content.toString();
-                return responseMessage;
             } catch (final Exception ex) {
                 responseCode = con.getResponseCode();
                 responseMessage = con.getResponseMessage();
-//                ex.printStackTrace();
-                return null;
             }
         } catch (Exception e) {
             responseCode = -1;
             responseMessage = "Нет соединения с сервером";
-            return null;
         }
     }
     public boolean isOk() {return responseCode == 200;}

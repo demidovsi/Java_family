@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
@@ -28,11 +27,13 @@ public class ChooseConfig extends JFrame {
     JTable table;
     boolean exist = false;
     public static JButton self = new JButton();  // для передачи форме message
-    private static Font font = new Font("Arial", Font.BOLD, 16);
+    private final JButton parentForm;
+    private final Font font = new Font("Arial", Font.PLAIN, 14);
     /* Конструктор класса */
-    public ChooseConfig(UserLanguages lang, Preferences user)
+    public ChooseConfig(UserLanguages lang, Preferences user, JButton parentObject)
     {
         super("");
+        parentForm = parentObject;
         userPrefs = user;
         languages = lang;
         self.addActionListener((e) -> changeLanguage());
@@ -54,8 +55,10 @@ public class ChooseConfig extends JFrame {
         GridLayout layout1 = new GridLayout(0, 3);
         panelButton1.setLayout(layout1);
         apply = new JButton("", new ImageIcon("images/apply.png"));
+        apply.addActionListener((e) -> applyClick());
         panelButton1.add(apply);
         openFile = new JButton("", new ImageIcon("images/open-file.png"));
+        openFile.addActionListener((e) -> refresh());
         panelButton1.add(openFile);
         saveFile = new JButton("", new ImageIcon("images/save-file.png"));
         panelButton1.add(saveFile);
@@ -134,7 +137,7 @@ public class ChooseConfig extends JFrame {
                 else  return false;
             }
             public void setValueAt(Object value, int row, int col) {
-                int index = arrayConfig.getSelectedIndex();
+                setValueAt(value, row, col);
             }
         };
         table = new JTable(dataModel);
@@ -179,10 +182,17 @@ public class ChooseConfig extends JFrame {
                 String contents = new String(Files.readAllBytes(path));
                 arrayJson = new JSONArray(contents);
                 exist = false;
+                int index = arrayConfig.getSelectedIndex();
+                String currentConfig = userPrefs.get("current_config", "");
                 arrayConfig.removeAllItems();
-                for (int i=0; i < arrayJson.length(); i++)
-                    { arrayConfig.addItem(arrayJson.getJSONObject(i).getString("name")); }
+                for (int i=0; i < arrayJson.length(); i++) {
+                    String name = arrayJson.getJSONObject(i).getString("name");
+                    if (currentConfig.equals(name)) index = i;
+                    arrayConfig.addItem(name);
+                    }
                 exist = true;
+                if (index == -1) index = 0;
+                arrayConfig.setSelectedIndex(index);
             } catch (Exception e) {
                 System.out.println("Failed to parse." + e);
             }
@@ -216,5 +226,20 @@ public class ChooseConfig extends JFrame {
         panelTree.setFont(font);
         table.getTableHeader().setFont(font);
         table.setRowHeight(font.getSize() + 5);
+    }
+    private void applyClick(){
+        if (exist) {
+            String currentConfig = (String) arrayConfig.getItemAt(arrayConfig.getSelectedIndex());
+            userPrefs.put("current_config", currentConfig); // запомнить сделанный выбор
+            try {
+                ActionEvent event = new ActionEvent(parentForm, Event.F6, "changeLanguage");
+                ActionListener[] listeners;
+                listeners = parentForm.getActionListeners();
+                listeners[0].actionPerformed(event);
+            } catch (Exception e) {
+                System.out.println("Error UnitConfig");
+            }
+            closeForm();  // закрыть форму
+        }
     }
 }
