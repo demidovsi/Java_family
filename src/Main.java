@@ -5,7 +5,7 @@ class Main {
     {
         Preferences  userPrefs = Preferences.userRoot().node("family"); // параметры программы
         UserLanguages userLanguages = new UserLanguages(); // возможные языки и их использование
-        userLanguages.setAppLanguage(userPrefs.get("family_language", "ru"));
+        userLanguages.setAppLanguage(userPrefs.get("language", "ru"));
         TForm form = new TForm(userLanguages, userPrefs);
         form.pack();
         form.makeSize();

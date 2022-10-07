@@ -12,15 +12,15 @@ import java.util.prefs.Preferences;
 import java.awt.event.*;
 
 public class ChooseLanguage extends JFrame {
-    private boolean exist = false;
-    private JButton parentForm;
-    private Preferences userPrefs;
+    private boolean exist;
+    private final JButton parentForm;
+    private final Preferences userPrefs;
     private static UserLanguages languages;
-    private static JButton apply = new JButton("", new ImageIcon("images/apply.png"));
-    private static JButton close = new JButton("", new ImageIcon("images/exit.png"));
-    private static Font font = new Font("Arial", Font.BOLD, 16);
-    private JTable table;
-    private DefaultTableModel rootModel;
+    private final static JButton apply = new JButton("", new ImageIcon("images/apply.png"));
+    private final static JButton close = new JButton("", new ImageIcon("images/exit.png"));
+    private final static Font font = new Font("Arial", Font.BOLD, 16);
+    private final JTable table;
+    private final DefaultTableModel rootModel;
     /* Конструктор класса */
     public ChooseLanguage(UserLanguages lang, Preferences user, JButton parentObject) {
         super();
@@ -128,7 +128,7 @@ public class ChooseLanguage extends JFrame {
                 lang = "ru";
                 languages.setAppLanguage((String) lang);  // восстановить текущий язык
             }
-            userPrefs.put("family_language", (String) lang);  // запомнить сделанный выбор
+            userPrefs.put("language", (String) lang);  // запомнить сделанный выбор
             closeForm();  // закрыть форму
         }
     }

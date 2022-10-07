@@ -9,7 +9,7 @@ import java.util.*;
 
 public class TForm extends JFrame {
     private final JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP); // Панель с вкладками
-    private static Summary panelSumma;
+    private static Summary summary;
     private final Preferences userPrefs;
     private final UserLanguages languages;
     private ChooseConfig chooseConfig;
@@ -25,7 +25,7 @@ public class TForm extends JFrame {
     private CheckConnection checkConnection;
     private static boolean exist;
 //--------------------------------------------------------
-    /* Конструктор класса */
+/* Конструктор класса */
     public TForm(UserLanguages lang, Preferences user)
     {
         super("");
@@ -33,20 +33,20 @@ public class TForm extends JFrame {
         languages = lang;
         statusBar.setForeground(Color.red);
         restAPI = new RestAPI(userPrefs);
-//        makeLogin();
+        makeLogin();
         // --------------------------
         setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
-        // Создание строки главного меню
+// Создание строки главного меню
         JMenuBar menuBar = new JMenuBar();
-        // Добавление в главное меню выпадающих пунктов меню
+// Добавление в главное меню выпадающих пунктов меню
         menuBar.add(createConsole());
         menuBar.add(createOptions());
 // Создание вкладок
-        panelSumma = new Summary();
-        panelSumma.setUserLanguages(languages);
-        panelSumma.setUserPreferences(userPrefs);
-        panelSumma.refresh();
-        tabs.addTab("", panelSumma);
+        summary = new Summary();
+        summary.setUserLanguages(languages);
+        summary.setUserPreferences(userPrefs);
+        summary.refresh();
+        tabs.addTab("", summary);
 
         JPanel panelOne = new JPanel();
         tabs.addTab("", panelOne);
@@ -131,7 +131,7 @@ public class TForm extends JFrame {
         }
         else {
             token = null;
-            System.out.println("login ERROR: " + Integer.toString(restAPI.getResponseCode()) + " = " +
+            System.out.println("login ERROR: " + restAPI.getResponseCode() + " = " +
                     restAPI.getResponseMessage());
         }
     }
@@ -145,9 +145,10 @@ public class TForm extends JFrame {
     private void closeForm() {
         /*        Закрыть программу и все дочерние формы      */
         saveSize();
-        panelSumma.saveSize();
+        summary.closeForm();
         if (chooseConfig != null) chooseConfig.saveSize();
         if (chooseLanguage != null) chooseLanguage.saveSize();
+        
         System.exit(0);
     }
     //--------------------------------------------------------
@@ -198,7 +199,7 @@ public class TForm extends JFrame {
         tabs.setTitleAt(1, languages.getText("form", 8,"Суточные расходы"));
         createApp.setText(languages.getText("one", 12,"Создать"));
         createApp.setToolTipText(languages.getText("form", 4,"Создать новую систему и схему базы данных"));
-        panelSumma.changeLanguage();
+        summary.changeLanguage();
     }
     private void loadApp(RestAPI restAPI){
         if (token != null) {

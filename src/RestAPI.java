@@ -60,8 +60,8 @@ public class RestAPI {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json");
-            con.setConnectTimeout(100);
-            con.setReadTimeout(100);
+            con.setConnectTimeout(30000);
+            con.setReadTimeout(30000);
             try {
                 InputStream input = con.getInputStream();
                 responseCode = con.getResponseCode();

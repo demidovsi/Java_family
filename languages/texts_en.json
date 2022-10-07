@@ -17,7 +17,8 @@
     {"id": 15, "text": "Collapse all"},
     {"id": 16, "text": "Confirmation"},
   {"id": 17, "text": "Close application ?"},
-  {"id": 18, "text": "Connection configuration correction"}
+  {"id": 18, "text": "Connection configuration correction"},
+  {"id": 19, "text": "rows in table= "}
 ],
 "form": [
     {"id": 1, "text": "Reading configuration"},

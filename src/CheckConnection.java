@@ -6,7 +6,8 @@ import java.awt.event.ActionListener;
 public class CheckConnection extends Thread  {
     int interval;
     JButton formParent;
-    boolean needStop, exist;
+    boolean needStop;
+    boolean exist = true;
     RestAPI restAPI;
     String informFromProxy = "";
     String textErrorConnection = "";
@@ -49,13 +50,11 @@ public class CheckConnection extends Thread  {
                         informFromProxy = "";
                         sendEvt(Event.F4, informFromProxy);  // характеристики БД
                     }
-                };
+                }
                 Thread.sleep(current_interval * 1000);
-            } catch (Exception err) {}
+            } catch (Exception err) {System.out.println(err.getMessage());}
         }
         System.out.println("Finish");
     }
-    public void setInterval(int value) { interval = value; }
-    public void setFormParent(JButton value) { formParent = value; }
     public void setNeedStop(boolean value) {needStop = value; }
 }
