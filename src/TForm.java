@@ -10,6 +10,7 @@ import java.util.*;
 public class TForm extends JFrame {
     private final JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP); // Панель с вкладками
     private static Summary summary;
+    private static OneDay oneDay;
     private final Preferences userPrefs;
     private final UserLanguages languages;
     private ChooseConfig chooseConfig;
@@ -48,8 +49,11 @@ public class TForm extends JFrame {
         summary.refresh();
         tabs.addTab("", summary);
 
-        JPanel panelOne = new JPanel();
-        tabs.addTab("", panelOne);
+        oneDay = new OneDay();
+        oneDay.setUserLanguages(languages);
+        oneDay.setUserPreferences(userPrefs);
+        oneDay.refresh();
+        tabs.addTab("", oneDay);
 
         add(tabs, BorderLayout.CENTER);
 // панель кнопок управления
@@ -146,6 +150,7 @@ public class TForm extends JFrame {
         /*        Закрыть программу и все дочерние формы      */
         saveSize();
         summary.closeForm();
+        oneDay.closeForm();
         if (chooseConfig != null) chooseConfig.saveSize();
         if (chooseLanguage != null) chooseLanguage.saveSize();
         
@@ -187,6 +192,8 @@ public class TForm extends JFrame {
     }
     private void changeLanguage() {
         /*        Формирование текстов по выбранному языку         */
+        summary.setDimension(getPreferredSize());
+        oneDay.setDimension(getPreferredSize());
         setTitle(languages.getText("main", -1, "Расходы семьи (Java)"));
         console.setText(languages.getText("main", 8, "Консоль"));
         font.setText(languages.getText("main", 1, "Выбрать фонт"));
@@ -200,6 +207,7 @@ public class TForm extends JFrame {
         createApp.setText(languages.getText("one", 12,"Создать"));
         createApp.setToolTipText(languages.getText("form", 4,"Создать новую систему и схему базы данных"));
         summary.changeLanguage();
+        oneDay.changeLanguage();
     }
     private void loadApp(RestAPI restAPI){
         if (token != null) {

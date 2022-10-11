@@ -27,4 +27,5 @@ public class PatternForm extends JPanel {
     public void closeForm() {exist = false; saveSize();}
     public void setUserPreferences(Preferences user) {userPrefs = user;}
     public void setUserLanguages(UserLanguages lang) {languages = lang;}
+    public void setDimension(Dimension dimension) {}
 }

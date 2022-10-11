@@ -116,7 +116,7 @@ public class Summary extends PatternForm {
         tableCategory = new JTable(rootModelCategory);
         tableCategory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         JScrollPane tableScrollCategory = new JScrollPane(tableCategory);
-        panelCategory.add(tableScrollCategory, BorderLayout.WEST);
+        panelCategory.add(tableScrollCategory, BorderLayout.CENTER);
 
         JPanel statusBarCategory = new JPanel(new GridLayout(1, 1));
         statusBarCategory.add(labelCategory);
@@ -346,7 +346,7 @@ public class Summary extends PatternForm {
                 }
 //                System.out.println(Integer.toString(masData.length()));
                 table.getColumnModel().getColumn(0).setPreferredWidth(200);
-                table.getColumnModel().getColumn(1).setPreferredWidth(80);
+                table.getColumnModel().getColumn(1).setPreferredWidth(100);
                 rootModel.setRowCount(0);
                 Arrays.fill(array_days, 0f);
                 for (int i=1; i<rootModel.getColumnCount(); i++)
@@ -359,8 +359,13 @@ public class Summary extends PatternForm {
                 }
                 current_guid = ""; // вывести таблицу по категории
                 exist = true;
-                table.changeSelection(0, 0, false, false);
-                showStatusBar(index);
+                try {
+                    table.changeSelection(0, 0, false, false);
+                    showStatusBar(index);
+                } catch (Exception err) {
+                    current_guid = "1111";
+                    showTable("");
+                }
             }
             changeLanguage();
         }
@@ -437,9 +442,9 @@ public class Summary extends PatternForm {
         if (!current_guid.equals(guid)) {
 //            System.out.println(guid);
             current_guid = guid;
-            tableCategory.getColumnModel().getColumn(0).setPreferredWidth(100);
-            tableCategory.getColumnModel().getColumn(1).setPreferredWidth(70);
-            tableCategory.getColumnModel().getColumn(2).setPreferredWidth(250);
+            tableCategory.getColumnModel().getColumn(0).setPreferredWidth(150);
+            tableCategory.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tableCategory.getColumnModel().getColumn(2).setPreferredWidth(300);
             tableCategory.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
             tableCategory.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
             tableCategory.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
@@ -463,5 +468,9 @@ public class Summary extends PatternForm {
             }
             labelCategory.setText(languages.getText("main", 19, "Строк") + countCategory);
         }
+    }
+    public void changeFont(Font font) {
+        table.getTableHeader().setFont(font);
+        tableCategory.getTableHeader().setFont(font);
     }
 }
