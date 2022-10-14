@@ -36,7 +36,9 @@ public class UnitConfig {
                     }
                 }
 
-            } catch (Exception e) {System.out.println("Error UnitConfig");}
+            } catch (Exception e) {
+                System.out.println("Error UnitConfig" + e.getMessage());
+            }
         }
     }
     public String getUrl() {return url;}

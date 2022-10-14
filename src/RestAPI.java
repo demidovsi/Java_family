@@ -38,6 +38,38 @@ public class RestAPI {
                     responseMessage = con.getResponseMessage();
                     System.err.println("connection failed");
                 }
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = Optional.of(reader.lines().collect(Collectors.joining(System.lineSeparator()))).get();
+                }
+                } catch (final Exception ex) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = con.getResponseMessage();
+                }
+        } catch (final Exception ex) {
+            responseCode = -1;
+            responseMessage = "No connection to the server!";
+        }
+    }
+    public void sendMess(String directive, String mes, String params){
+        unitConfig = new UnitConfig(userPreferences);
+        try {
+            URL url = new URL(unitConfig.getUrl() + mes);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            try {
+                con.setRequestMethod(directive);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setConnectTimeout(30000);
+                con.setReadTimeout(30000);
+                con.setDoOutput(true);
+                try (OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream())) {
+                    writer.write(params);
+                }
+                if (con.getResponseCode() != 200) {
+                    responseCode = con.getResponseCode();
+                    responseMessage = con.getResponseMessage();
+                    System.err.println("connection failed");
+                }
                 try(BufferedReader reader = new BufferedReader(
 //                        new InputStreamReader(con.getInputStream(), Charset.forName("utf-8")))) {
                         new InputStreamReader(con.getInputStream()))) {
@@ -50,7 +82,7 @@ public class RestAPI {
                 }
         } catch (final Exception ex) {
             responseCode = -1;
-            responseMessage = "Нет соединения с сервером";
+            responseMessage = "No connection to the server!";
         }
     }
     public void get(String mes) {
@@ -80,7 +112,7 @@ public class RestAPI {
             }
         } catch (Exception e) {
             responseCode = -1;
-            responseMessage = "Нет соединения с сервером";
+            responseMessage = "No connection to the server!";
         }
     }
     public boolean isOk() {return responseCode == 200;}

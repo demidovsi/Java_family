@@ -27,7 +27,7 @@ public class UserLanguages {
                 String contents = new String(Files.readAllBytes(path));
                 JSONObject langs = new JSONObject(contents);
                 JSONArray arrayLangs = langs.getJSONArray("languages");
-                System.out.println(arrayLangs);
+//                System.out.println(arrayLangs);
                 count_language = arrayLangs.length();
                 idLanguages = new String[count_language];
                 nameLanguages = new String[count_language];

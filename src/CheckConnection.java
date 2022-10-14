@@ -25,6 +25,7 @@ public class CheckConnection extends Thread  {
     }
     @Override
     public void run() {
+        System.out.println("CheckConnection Started");
         while (!needStop) {
             try {
                 restAPI.get("MDMProxy.Inform");
@@ -54,7 +55,7 @@ public class CheckConnection extends Thread  {
                 Thread.sleep(current_interval * 1000);
             } catch (Exception err) {System.out.println(err.getMessage());}
         }
-        System.out.println("Finish");
+        System.out.println("CheckConnection Finished");
     }
     public void setNeedStop(boolean value) {needStop = value; }
 }

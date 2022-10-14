@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -21,7 +22,10 @@ public class Summary extends PatternForm {
     static JLabel labelDays2 = new JLabel("label2");
     static JLabel labelCategory = new JLabel("Category");
     JComboBox<String> intervals, chooseMonth;
-    JSpinField day, year;
+    JSpinner day;
+    JSpinner year;
+    SpinnerNumberModel spinnerYear;
+    SpinnerNumberModel spinnerDay;
     JCheckBox graph;
     int current_year, current_month, current_day;
     static Calendar calendar = Calendar.getInstance();
@@ -34,9 +38,12 @@ public class Summary extends PatternForm {
     static String current_guid; // guid для вывода уточняющей таблицы по выбранной категории.
     static int countCategory;
     JPanel panelCategory;
+    public Summary(JButton parentObject) {
+        super(parentObject);
+    }
     public void createGUI(){
 // верхняя часть
-        refresh = new JButton("", new ImageIcon("images/mail-read.png"));
+        refresh = new JButton("", new ImageIcon("images/open-file.png"));
         refresh.addActionListener((e) -> refresh());
         labelInterval = new JLabel();
         intervals = new JComboBox();
@@ -49,12 +56,13 @@ public class Summary extends PatternForm {
         chooseMonth.addActionListener((e) -> monthChanged());
         chooseMonth.setMaximumRowCount(12);
         labelYear = new JLabel();
-        year = new JSpinField();
-        year.setMaximum(2050);
-        year.setMinimum(2000);
-        day = new JSpinField();
-        day.setMinimum(1);
-        day.setMaximum(31);
+        spinnerYear = new SpinnerNumberModel(2000, 2000, 3000, 1);
+        year = new JSpinner(spinnerYear);
+        spinnerYear.addChangeListener((e) -> refresh());
+
+        spinnerDay = new SpinnerNumberModel(1, 1, 31, 1);
+        day = new JSpinner(spinnerDay);
+        spinnerDay.addChangeListener((e) -> refresh());
         day.setPreferredSize(new Dimension(40, 20));
         day.setAlignmentX(CENTER_ALIGNMENT);
         after = new JButton("+1", new ImageIcon("images/next.png"));
@@ -83,7 +91,7 @@ public class Summary extends PatternForm {
         gui.add(buttonScroll, BorderLayout.NORTH);
 // средняя часть
         JPanel panelTable = new JPanel(new BorderLayout(5,5));
-        rootModel = new DefaultTableModel(new String[1][2], new String[] {"Тип расхода", "Истрачено"}){
+        rootModel = new DefaultTableModel(new String[1][33], new String[33]){
             public boolean isCellEditable(int row, int column){
                 return false;
             }
@@ -93,6 +101,7 @@ public class Summary extends PatternForm {
 
         ListSelectionModel selModel = table.getSelectionModel();
         selModel.addListSelectionListener((e) -> rowSelected());
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane tableScroll = new JScrollPane(table);
         panelTable.add(tableScroll, BorderLayout.CENTER);
 
@@ -108,7 +117,7 @@ public class Summary extends PatternForm {
         panelCategory = new JPanel(new BorderLayout(3,3));
         panelCategory.setBorder( new TitledBorder("Категория") );
         JScrollPane panelCategoryScroll = new JScrollPane(panelCategory);
-        rootModelCategory = new DefaultTableModel(new String[1][3], new String[] {"Дата", "Истрачено", "Комментарий"}){
+        rootModelCategory = new DefaultTableModel(new String[1][4], new String[] {"Дата", "Истрачено", "Комментарий", "ID"}){
             public boolean isCellEditable(int row, int column){
                 return false;
             }
@@ -117,6 +126,23 @@ public class Summary extends PatternForm {
         tableCategory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         JScrollPane tableScrollCategory = new JScrollPane(tableCategory);
         panelCategory.add(tableScrollCategory, BorderLayout.CENTER);
+        tableCategory.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table =(JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+//                    System.out.println("row=" + row);
+                    String dateRow = (String) table.getModel().getValueAt(row, 0);
+                    int idRow = Integer.parseInt((String) table.getModel().getValueAt(row, 3));
+
+                    ActionEvent event = new ActionEvent(parentForm, Event.F8, dateRow + "/" + idRow);
+                    ActionListener[] listeners;
+                    listeners = parentForm.getActionListeners();
+                    listeners[0].actionPerformed(event);
+                }
+            }
+        });
 
         JPanel statusBarCategory = new JPanel(new GridLayout(1, 1));
         statusBarCategory.add(labelCategory);
@@ -143,6 +169,9 @@ public class Summary extends PatternForm {
 
         add(gui);
         setLayout(new GridLayout(1, 1));
+        self.addActionListener((e) -> {
+            if (e.getID() == Event.F2) refresh();  // изменение вкличны JSpinner
+        });
     }
     public void changeLanguage() {
         if (languages != null) {
@@ -180,6 +209,7 @@ public class Summary extends PatternForm {
             tableCategory.getColumnModel().getColumn(0).setHeaderValue(languages.getText("one", 1, "Дата"));
             tableCategory.getColumnModel().getColumn(1).setHeaderValue(languages.getText("one", 2, "Истрачено"));
             tableCategory.getColumnModel().getColumn(2).setHeaderValue(languages.getText("one", 4, "Комментарий"));
+            tableCategory.getColumnModel().getColumn(3).setHeaderValue("ID");
             if (intervals.getSelectedIndex() == 2)
                 for (int i=1; i<=12; i++)
                     table.getColumnModel().getColumn(i+1).setHeaderValue(languages.getText("months", i, "Месяц"));
@@ -196,21 +226,21 @@ public class Summary extends PatternForm {
         SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
         switch (index) {
             case 0 -> {  // сутки
-                Calendar calendar1 = new GregorianCalendar(year.getValue(), chooseMonth.getSelectedIndex(), day.getValue());
+                Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), (Integer) spinnerDay.getValue());
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.DAY_OF_MONTH, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
             }
             case 1 -> {  // месяц
                 result = result + "_month";
-                Calendar calendar1 = new GregorianCalendar(year.getValue(), chooseMonth.getSelectedIndex(), 1);
+                Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), 1);
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.MONTH, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
             }
             case 2 -> {  // Год
                 result = result + "_year";
-                Calendar calendar1 = new GregorianCalendar(year.getValue(), 0, 1);
+                Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), 0, 1);
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.YEAR, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
@@ -222,7 +252,7 @@ public class Summary extends PatternForm {
     }
     private void changeDate(int value) {
         int index = intervals.getSelectedIndex();
-        Calendar calendar1 = new GregorianCalendar(year.getValue(), chooseMonth.getSelectedIndex(), day.getValue());
+        Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), (Integer) spinnerDay.getValue());
         switch (index) {
             case 0 ->  calendar1.add(Calendar.DAY_OF_MONTH, value);
             case 1 ->  calendar1.add(Calendar.MONTH, value);
@@ -236,7 +266,7 @@ public class Summary extends PatternForm {
         refresh();
 
     }
-    private void beforeClicked() { changeDate(-1);}
+    private void beforeClicked() { changeDate(-1); }
     private void afterClicked() { changeDate(+1);}
     private JSONObject makeData(JSONObject data, int iFrom, int count) {
         JSONObject result = new JSONObject();
@@ -258,7 +288,7 @@ public class Summary extends PatternForm {
         String key;
         switch (index) {
             case 0 ->  l = 2;
-            case 1 ->  l = 2 + day.getMaximum();
+            case 1 ->  l = 2 + (Integer) spinnerDay.getMaximum();
             case 2 ->  l = 2 + 12;
         }
         String[] arr = new String[l];
@@ -266,23 +296,28 @@ public class Summary extends PatternForm {
         if (!param.isNull("money")) {
             arr[1] = new DecimalFormat("#.00").format(param.getFloat("money"));
         }
-        for (int i=1; i <= l-2; i++){
-            key = Integer.toString(i);
-            if (!param.isNull(key)) {
-                value = param.getFloat(key);
-                arr[i + 1] = new DecimalFormat("#.00").format(value);
-                array_days[i - 1] = array_days[i - 1] + value;
-            }
+        if (index == 0) {
+            array_days[0] = array_days[0] + param.getFloat("money");
+        }
+        else
+            for (int i=1; i <= l-2; i++){
+                key = Integer.toString(i);
+                if (!param.isNull(key)) {
+                    value = param.getFloat(key);
+                    arr[i + 1] = new DecimalFormat("#.00").format(value);
+                    array_days[i - 1] = array_days[i - 1] + value;
+                }
         }
         return arr;
     }
     private void showStatusBar(int index) {
         Float summa = 0f;
         for (Float unit : array_days) summa = summa + unit;
-        if (index == 0) { labelDays1.setText(""); labelDays2.setText(""); labelSummary.setText("");}
+        labelSummary.setText("    " + languages.getText("one", 5, "Суммарно") + '=' +
+                new DecimalFormat("#.00").format(summa));
+        if (index == 0) { labelDays1.setText(""); labelDays2.setText("");}
         else {
-            labelSummary.setText("    " + languages.getText("one", 5, "Суммарно") + '=' +
-                    new DecimalFormat("#.00").format(summa));
+
             int count = rootModel.getColumnCount() - 2;
             String st1 = ""; String st2 =""; String st; String stName;
             for (int i=0; i<count; i++){
@@ -316,6 +351,7 @@ public class Summary extends PatternForm {
     public void refresh() {
         if (exist) {
             exist = false;
+            panelCategory.setBorder( new TitledBorder(""));
             intervalChanged();
             monthChanged();  // проверить день месяца на всякий случай (февраль)
             int index = intervals.getSelectedIndex();
@@ -326,22 +362,20 @@ public class Summary extends PatternForm {
             if (restAPI.isOk()) {
                 masData = new JSONArray("[]");
                 JSONArray units = new JSONArray(restAPI.getResponseMessage());
+                switch (index) {
+                    case 0 -> { rootModel.setColumnCount(2); }
+                    case 1 -> { rootModel.setColumnCount(2 + (Integer) spinnerDay.getMaximum()); }
+                    case 2 -> { rootModel.setColumnCount(2 + 12);}
+                }
                 for (int i=0; i < units.length(); i++) {
                     switch (index) {
-                        case 0 -> {
-                            rootModel.setColumnCount(2);
-                            masData.put(makeData(units.getJSONObject(i), 0, 0));
-                        }
+                        case 0 -> { masData.put(makeData(units.getJSONObject(i), 0, 0));}
                         case 1-> {
-                            rootModel.setColumnCount(2 + day.getMaximum());
-                            for (int j=1; j <= day.getMaximum(); j++)
+                            for (int j=1; j <= (Integer) spinnerDay.getMaximum(); j++)
                                 table.getColumnModel().getColumn(j + 1).setHeaderValue(Integer.toString(j));
                             masData.put(makeData(units.getJSONObject(i), 8, 31));
                         }
-                        case 2 -> {
-                            rootModel.setColumnCount(2 + 12);
-                            masData.put(makeData(units.getJSONObject(i), 8, 12));
-                        }
+                        case 2 -> { masData.put(makeData(units.getJSONObject(i), 8, 12)); }
                     }
                 }
 //                System.out.println(Integer.toString(masData.length()));
@@ -377,10 +411,10 @@ public class Summary extends PatternForm {
         if (exist) { refresh(); } // вывести информацию
     }
     private void monthChanged(){
-        Calendar calendar1 = new GregorianCalendar(year.getValue(), chooseMonth.getSelectedIndex(), 1);
+        Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), 1);
         int countDays = calendar1.getActualMaximum(Calendar.DAY_OF_MONTH);
-        if (day.getValue() > countDays) day.setValue(countDays);
-        day.setMaximum(countDays);
+        if ((Integer) spinnerDay.getValue() > countDays) day.setValue(countDays);
+        spinnerDay.setMaximum(countDays);
         if (exist) refresh();
     }
     private void currentClicked(){
@@ -410,9 +444,9 @@ public class Summary extends PatternForm {
         exist = ex;
     }
     public void saveSize() {
-        current_day = day.getValue();
+        current_day = (Integer) spinnerDay.getValue();
         current_month = chooseMonth.getSelectedIndex() + 1;
-        current_year = year.getValue();
+        current_year = (Integer) spinnerYear.getValue();
         int index = intervals.getSelectedIndex();
         userPrefs.putInt("summary_year", current_year);
         userPrefs.putInt("summary_month", current_month);
@@ -427,27 +461,26 @@ public class Summary extends PatternForm {
                 for (int j=0; j<masData.length(); j++) {
                     if (masData.getJSONObject(j).getString("cat_name").equals(value)) {
                         String guid = masData.getJSONObject(j).getString("guid");
-//                        System.out.println(guid);
                         showTable(guid);
                         break;
                     }
                 }
                 panelCategory.setBorder( new TitledBorder(value) );
-//                System.out.println((String) value);
                 break;
             }
         }
     }
     private void showTable(String guid) {
         if (!current_guid.equals(guid)) {
-//            System.out.println(guid);
             current_guid = guid;
             tableCategory.getColumnModel().getColumn(0).setPreferredWidth(150);
             tableCategory.getColumnModel().getColumn(1).setPreferredWidth(100);
             tableCategory.getColumnModel().getColumn(2).setPreferredWidth(300);
+            tableCategory.getColumnModel().getColumn(3).setPreferredWidth(100);
             tableCategory.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
             tableCategory.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
             tableCategory.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+            tableCategory.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
             rootModelCategory.setRowCount(0);
             countCategory = 0;
             for (int i=0; i < masData.length(); i++)
@@ -457,14 +490,17 @@ public class Summary extends PatternForm {
                     try {
                         if (unit.getInt("lev") == 2 & !unit.isNull("money") & unit.getString("guid_parent").equals(guid))
                         {
-                            String[] row = new String[3];
+                            String[] row = new String[4];
                             row[0] = unit.getString("dt").split("T")[0];
                             row[1] = new DecimalFormat("#.00").format(unit.getFloat("money"));
                             row[2] = translateFromBase(unit.getString("comment"));
+                            row[3] = Integer.toString(unit.getInt("id"));
                             rootModelCategory.addRow(row);
                             countCategory++;
                         }
-                    } catch (Exception err) {System.out.println(err.getMessage());}
+                    } catch (Exception err) {
+                        System.out.println(err.getMessage());
+                    }
             }
             labelCategory.setText(languages.getText("main", 19, "Строк") + countCategory);
         }

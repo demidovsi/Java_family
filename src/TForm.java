@@ -1,11 +1,9 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.prefs.Preferences;
-import java.util.*;
 
 public class TForm extends JFrame {
     private final JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP); // Панель с вкладками
@@ -17,7 +15,7 @@ public class TForm extends JFrame {
     private ChooseLanguage chooseLanguage;
     private final JButton self = new JButton();
     private JMenu console, compliment;
-    private static JButton createApp; // кнопка создания новой схемы БД
+//    private static JButton createApp; // кнопка создания новой схемы БД
     private final JLabel statusBar = new JLabel("");
     private JMenuItem font, lang, exit, config;
     private final JComboBox apps = new JComboBox();
@@ -43,26 +41,25 @@ public class TForm extends JFrame {
         menuBar.add(createConsole());
         menuBar.add(createOptions());
 // Создание вкладок
-        summary = new Summary();
-        summary.setUserLanguages(languages);
-        summary.setUserPreferences(userPrefs);
+        summary = new Summary(self);
+        summary.beforeWork(userPrefs, languages);
         summary.refresh();
         tabs.addTab("", summary);
 
-        oneDay = new OneDay();
-        oneDay.setUserLanguages(languages);
-        oneDay.setUserPreferences(userPrefs);
+        oneDay = new OneDay(self);
+        oneDay.beforeWork(userPrefs, languages);
         oneDay.refresh();
         tabs.addTab("", oneDay);
 
         add(tabs, BorderLayout.CENTER);
 // панель кнопок управления
-        createApp = new JButton();
+//        createApp = new JButton();
+//        createApp.addActionListener((e) -> createAppClick());
         apps.setEditable(false);
         apps.setMaximumRowCount(20);
 
         JPanel panelButtons = new JPanel();
-        panelButtons.add(createApp, "North");
+//        panelButtons.add(createApp, "North");
         panelButtons.add(apps, BorderLayout.NORTH);
 
         JPanel panelStatusBar = new JPanel();
@@ -104,13 +101,26 @@ public class TForm extends JFrame {
             if (e.getID() == Event.F3) statusBar.setText(e.getActionCommand());  // смена состояния соединения с БД
             if (e.getID() == Event.F4) {  // смена базы или версии
                 setTitle(languages.getText("main", -1, "Расходы семьи (Java)") + " " + e.getActionCommand());
+                summary.refresh();
+                oneDay.refresh();
             }
-            if (e.getID() == Event.F5) makeLogin();  // восстановление соединения
+            if (e.getID() == Event.F5) {  // восстановление соединения
+                makeLogin();
+                summary.refresh();
+                oneDay.refresh();
+            }
             if (e.getID() == Event.F6) {
                 checkConnection.needStop = true;
                 makeLogin();
                 checkConnection = new CheckConnection(restAPI, self, new UnitConfig(userPrefs).getIntervalConnection());
                 checkConnection.start();
+                summary.refresh();
+                oneDay.refresh();
+            }
+            if (e.getID() == Event.F8) {
+                String[] par = e.getActionCommand().split("/");
+                oneDay.setSelectedRow(Integer.parseInt(par[1]), par[0]);
+                tabs.setSelectedIndex(1);
             }
         });
         changeLanguage();
@@ -124,13 +134,14 @@ public class TForm extends JFrame {
         /*        Загрузка геометрии и топологии         */
         setLocation(userPrefs.getInt("main_left", 100), userPrefs.getInt("main_top", 50));
         setSize(userPrefs.getInt("main_width", 1200), userPrefs.getInt("main_height", 800));
+        tabs.setSelectedIndex(userPrefs.getInt("page_index", 0));
     }
     public void makeLogin(){
         restAPI.login();
         if (restAPI.isOk()) {
             JSONObject st = new JSONObject(restAPI.getResponseMessage());
             token = st.getString("accessToken");
-            System.out.println("token=" + token);
+//            System.out.println("token=" + token);
             loadApp(restAPI);
         }
         else {
@@ -145,6 +156,7 @@ public class TForm extends JFrame {
         userPrefs.putInt("main_height", getHeight());
         userPrefs.putInt("main_top", getLocation().y);
         userPrefs.putInt("main_left", getLocation().x);
+        userPrefs.putInt("page_index", tabs.getSelectedIndex());
     }
     private void closeForm() {
         /*        Закрыть программу и все дочерние формы      */
@@ -153,7 +165,6 @@ public class TForm extends JFrame {
         oneDay.closeForm();
         if (chooseConfig != null) chooseConfig.saveSize();
         if (chooseLanguage != null) chooseLanguage.saveSize();
-        
         System.exit(0);
     }
     //--------------------------------------------------------
@@ -175,8 +186,10 @@ public class TForm extends JFrame {
     private JMenu createOptions() {
         compliment = new JMenu("");
         config = new JMenuItem();
-        config.addActionListener((e) -> {chooseConfig = new ChooseConfig(languages, userPrefs, self);
-            chooseConfig.makeSize();});
+        config.addActionListener((e) -> {
+            chooseConfig = new ChooseConfig(languages, userPrefs, self);
+            chooseConfig.makeSize();
+        });
 // Добавление к пункту меню
         compliment.add(config);
         return compliment;
@@ -188,12 +201,9 @@ public class TForm extends JFrame {
             listeners = self.getActionListeners();
             listeners[0].actionPerformed(event);
         }
-
     }
     private void changeLanguage() {
         /*        Формирование текстов по выбранному языку         */
-        summary.setDimension(getPreferredSize());
-        oneDay.setDimension(getPreferredSize());
         setTitle(languages.getText("main", -1, "Расходы семьи (Java)"));
         console.setText(languages.getText("main", 8, "Консоль"));
         font.setText(languages.getText("main", 1, "Выбрать фонт"));
@@ -204,8 +214,8 @@ public class TForm extends JFrame {
         reSend(chooseConfig, chooseConfig.self, "changeLanguage");
         tabs.setTitleAt(0, languages.getText("form", 7, "Сводные расходы"));
         tabs.setTitleAt(1, languages.getText("form", 8,"Суточные расходы"));
-        createApp.setText(languages.getText("one", 12,"Создать"));
-        createApp.setToolTipText(languages.getText("form", 4,"Создать новую систему и схему базы данных"));
+//        createApp.setText(languages.getText("one", 12,"Создать"));
+//        createApp.setToolTipText(languages.getText("form", 4,"Создать новую систему и схему базы данных"));
         summary.changeLanguage();
         oneDay.changeLanguage();
     }
