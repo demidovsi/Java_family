@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.prefs.Preferences;
-import com.toedter.components.JSpinField;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.swing.border.TitledBorder;
@@ -48,6 +47,7 @@ public class Summary extends PatternForm {
         labelInterval = new JLabel();
         intervals = new JComboBox();
         for (int i=1; i <= 3; i++) {intervals.addItem(Integer.toString(i));}
+        intervals.setSelectedIndex(0);
         intervals.addActionListener((e) -> intervalChanged());
         before = new JButton("-1", new ImageIcon("images/prev.png"));
         before.addActionListener((e) -> beforeClicked());
@@ -312,7 +312,7 @@ public class Summary extends PatternForm {
     }
     private void showStatusBar(int index) {
         Float summa = 0f;
-        for (Float unit : array_days) summa = summa + unit;
+        for (Float unit : array_days) if (unit != null) summa = summa + unit;
         labelSummary.setText("    " + languages.getText("one", 5, "Суммарно") + '=' +
                 new DecimalFormat("#.00").format(summa));
         if (index == 0) { labelDays1.setText(""); labelDays2.setText("");}
@@ -321,7 +321,7 @@ public class Summary extends PatternForm {
             int count = rootModel.getColumnCount() - 2;
             String st1 = ""; String st2 =""; String st; String stName;
             for (int i=0; i<count; i++){
-                if (array_days[i] != 0) {
+                if (array_days[i] != null && array_days[i] != 0) {
                     st = new DecimalFormat("#").format(array_days[i]);
                     stName = (String) table.getColumnModel().getColumn(i + 2).getHeaderValue();
                     if (index == 1) stName = "[" + stName + "]";
