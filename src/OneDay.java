@@ -131,10 +131,10 @@ public class OneDay  extends PatternForm {
         gui.add(panelTable);
         add(gui);
         setLayout(new GridLayout(1, 1));
-        self.addActionListener((e) ->
-        {
-            if (e.getID() == Event.F7) tableChanged();  // смена языка
-        });
+//        self.addActionListener((e) ->
+//        {
+//            if (e.getID() == Event.F7) tableChanged();  // смена языка
+//        });
     }
 
     public void changeLanguage() {
@@ -175,18 +175,6 @@ public class OneDay  extends PatternForm {
         for (int i=1; i <= count; i++) result.put(Integer.toString(i), data.get(Integer.toString(iFrom + i)));
 //        System.out.println(result);
         return result;
-    }
-    private String translateFromBase(String st) {
-        return st.replace("~LF~", "\n")
-                .replace("~A~", "(")
-                .replace("~B~", ")")
-                .replace("~a1~", "@")
-                .replace("~a2~", ",")
-                .replace("~a3~", "=")
-                .replace("~a4~", "\"")
-                .replace("~a5~", "'")
-                .replace("~a6~", ":")
-                ;
     }
     private int getCatId(String catName) {
         for (int i=0; i < categories.length(); i++) {

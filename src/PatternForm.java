@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
 
 public class PatternForm extends JPanel {
@@ -35,4 +37,22 @@ public class PatternForm extends JPanel {
     public void setUserPreferences(Preferences user) {userPrefs = user;}
     public void setUserLanguages(UserLanguages lang) {languages = lang;}
     public void prepareWork() {};
+    public String translateFromBase(String st) {
+        return st.replace("~LF~", "\n")
+                .replace("~A~", "(")
+                .replace("~B~", ")")
+                .replace("~a1~", "@")
+                .replace("~a2~", ",")
+                .replace("~a3~", "=")
+                .replace("~a4~", "\"")
+                .replace("~a5~", "'")
+                .replace("~a6~", ":")
+                ;
+    }
+    public void sendMessage(int id, String text) {
+        ActionEvent event = new ActionEvent(parentForm, id, text);
+        ActionListener[] listeners = parentForm.getActionListeners();
+        for (ActionListener listener : listeners)
+            listener.actionPerformed(event);
+    }
 }

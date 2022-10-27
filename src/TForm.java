@@ -117,7 +117,7 @@ public class TForm extends JFrame {
                 summary.refresh();
                 oneDay.refresh();
             }
-            if (e.getID() == Event.F8) {
+            if (e.getID() == -1001) {
                 String[] par = e.getActionCommand().split("/");
                 oneDay.setSelectedRow(Integer.parseInt(par[1]), par[0]);
                 tabs.setSelectedIndex(1);

@@ -135,11 +135,7 @@ public class Summary extends PatternForm {
 //                    System.out.println("row=" + row);
                     String dateRow = (String) table.getModel().getValueAt(row, 0);
                     int idRow = Integer.parseInt((String) table.getModel().getValueAt(row, 3));
-
-                    ActionEvent event = new ActionEvent(parentForm, Event.F8, dateRow + "/" + idRow);
-                    ActionListener[] listeners;
-                    listeners = parentForm.getActionListeners();
-                    listeners[0].actionPerformed(event);
+                    sendMessage(-1001, dateRow + "/" + idRow);
                 }
             }
         });
@@ -335,18 +331,6 @@ public class Summary extends PatternForm {
             labelDays1.setText(" " + st1);
             labelDays2.setText(" " + st2);
         }
-    }
-    private String translateFromBase(String st) {
-        return st.replace("~LF~", "\n")
-                .replace("~A~", "(")
-                .replace("~B~", ")")
-                .replace("~a1~", "@")
-                .replace("~a2~", ",")
-                .replace("~a3~", "=")
-                .replace("~a4~", "\"")
-                .replace("~a5~", "'")
-                .replace("~a6~", ":")
-        ;
     }
     public void refresh() {
         if (exist) {
