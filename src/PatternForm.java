@@ -47,6 +47,20 @@ public class PatternForm extends JPanel {
                 .replace("~a4~", "\"")
                 .replace("~a5~", "'")
                 .replace("~a6~", ":")
+                .replace("~b1~", "/")
+                ;
+    }
+    public String translateToBase(String st) {
+        return st.replace( "\n", "~LF~")
+                .replace( "(", "~A~")
+                .replace( ")", "~B~")
+                .replace( "@", "~a1~")
+                .replace( ",", "~a2~")
+                .replace( "=", "~a3~")
+                .replace( "\"", "~a4~")
+                .replace( "'", "~a5~")
+                .replace( ":", "~a6~")
+                .replace( "/", "~b1~")
                 ;
     }
     public void sendMessage(int id, String text) {

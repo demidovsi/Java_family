@@ -190,10 +190,12 @@ public class OneDay  extends PatternForm {
         table.getColumnModel().getColumn(1).getCellEditor().stopCellEditing();
         table.getColumnModel().getColumn(0).getCellEditor().stopCellEditing();
     }
+    private void defineEnabled(boolean value) {
+        delete.setEnabled(value);
+        makeMultiply.setEnabled(value);
+    }
     public void refresh() {
-        delete.setEnabled(false);
-        save.setEnabled(false);
-        makeMultiply.setEnabled(false);
+        defineEnabled(false);
         stopCelling();
         exist = false;
         String schemaName = new UnitConfig(userPrefs).getSchemaName();
@@ -209,8 +211,8 @@ public class OneDay  extends PatternForm {
             table.getColumnModel().getColumn(3).setPreferredWidth(300);
             table.getColumnModel().getColumn(4).setPreferredWidth(50);
             table.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
-            table.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
             table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+            table.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
             for (int i=6; i<10; i++) {
                 table.getColumnModel().getColumn(i).setMinWidth(0);
                 table.getColumnModel().getColumn(i).setMaxWidth(0);
@@ -246,9 +248,8 @@ public class OneDay  extends PatternForm {
         try {
             table.changeSelection(0, 0, false, false);
         } catch (Exception err) {
-            delete.setEnabled(false);
-            makeMultiply.setEnabled(false);
         }
+        setSaveEnabled();
     }
     public void changeFont(Font font) {
         table.getTableHeader().setFont(font);
@@ -264,15 +265,13 @@ public class OneDay  extends PatternForm {
     }
     private void rowSelected() {
         if (exist) {
-            delete.setEnabled(false);
-            makeMultiply.setEnabled(false);
+            defineEnabled(false);
             stopCelling();
             if (countRow !=0) {
                 int[] selectedRows = table.getSelectedRows();
                 selectedId = Integer.parseInt((String) rootModel.getValueAt(selectedRows[0], 4));
                 for (int selIndex : selectedRows) {
-                    delete.setEnabled(true);
-                    makeMultiply.setEnabled(true);
+                    defineEnabled(true);
                     break;
                 }
             }
@@ -428,7 +427,7 @@ public class OneDay  extends PatternForm {
                     st = rootModel.getValueAt(i, 0).toString(); // дата
                     result1.put("dt", "'" + st + "'");
                     st = (String) rootModel.getValueAt(i, 3); // комментарий
-                    result1.put("comment", st);
+                    result1.put("comment", translateToBase(st));
                     result1.put("money", (Double) rootModel.getValueAt(i, 1)); // расход
                     values.put(result1);
                 }
