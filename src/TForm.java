@@ -31,7 +31,10 @@ public class TForm extends JFrame {
         userPrefs = user;
         languages = lang;
         statusBar.setForeground(Color.red);
-        restAPI = new RestAPI(userPrefs);
+        restAPI = new RestAPI();
+        RestAPI.userPreferences = userPrefs;
+        RestAPI.unitConfig = new UnitConfig(userPrefs);
+
         makeLogin();
         // --------------------------
         setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
@@ -43,12 +46,12 @@ public class TForm extends JFrame {
 // Создание вкладок
         summary = new Summary(self);
         summary.beforeWork(userPrefs, languages);
-        summary.refresh();
+//        summary.refresh();
         tabs.addTab("", summary);
 
         oneDay = new OneDay(self);
         oneDay.beforeWork(userPrefs, languages);
-        oneDay.refresh();
+//        oneDay.refresh();
         tabs.addTab("", oneDay);
 
         add(tabs, BorderLayout.CENTER);

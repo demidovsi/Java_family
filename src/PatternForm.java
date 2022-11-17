@@ -8,7 +8,7 @@ public class PatternForm extends JPanel {
     static Preferences userPrefs;
     static UserLanguages languages;
     private final Font font = new Font("Arial", Font.BOLD, 16);
-    static boolean exist;
+    static boolean exist = false;
     public final JButton parentForm;
     public static JButton self = new JButton();  // для передачи форме message
     /* Конструктор класса */

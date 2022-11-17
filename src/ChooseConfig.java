@@ -116,18 +116,19 @@ public class ChooseConfig extends JFrame {
                 String name = arrayJson.getJSONObject(index).getString("name");
                 String key = "", val = "";
                 switch (rowIndex) {
-                    case 0 -> {key = "url"; val = arrayJson.getJSONObject(index).getString(key); }
-                    case 1 -> {key = "schema_name"; val = arrayJson.getJSONObject(index).getString(key); }
-                    case 2 -> {key = "info_code"; val = arrayJson.getJSONObject(index).getString(key); }
-                    case 3 -> {key = "interval"; val = Integer.toString(arrayJson.getJSONObject(index).getInt(key)); }
-                    case 4 -> {key = "url_login"; val = arrayJson.getJSONObject(index).getString(key); }
-                    case 5 -> {key = "user_name"; val = arrayJson.getJSONObject(index).getString(key); }
-                    case 6 -> {key = "password"; val = arrayJson.getJSONObject(index).getString(key); }
+                    case 0: {key = "url"; val = arrayJson.getJSONObject(index).getString(key); break;}
+                    case 1: {key = "schema_name"; val = arrayJson.getJSONObject(index).getString(key); break;}
+                    case 2: {key = "info_code"; val = arrayJson.getJSONObject(index).getString(key); break;}
+                    case 3: {key = "interval"; val = Integer.toString(arrayJson.getJSONObject(index).getInt(key)); break;}
+                    case 4: {key = "url_login"; val = arrayJson.getJSONObject(index).getString(key); break;}
+                    case 5: {key = "user_name"; val = arrayJson.getJSONObject(index).getString(key); break;}
+                    case 6: {key = "password"; val = arrayJson.getJSONObject(index).getString(key); break;}
                 }
                 switch (columnIndex){
-                    case 0 -> {if (rowIndex == 0) return name; else return "";}
-                    case 1 -> {return key;}
-                    case 2, 3 -> {return val;}
+                    case 0: {if (rowIndex == 0) return name; else return ""; }
+                    case 1: {return key; }
+                    case 2: {return val; }
+                    case 3: {return val; }
                 }
                 return null;
             }

@@ -5,19 +5,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RestAPI {
-    private final Preferences userPreferences;
+    static Preferences userPreferences;
+    static UnitConfig unitConfig;
     private int responseCode;
     private String responseMessage;
-    private UnitConfig unitConfig;
-    public RestAPI(Preferences user){
-        userPreferences = user;
-    }
+    public RestAPI(){}
     public String getUrl() {
-        if (unitConfig == null) unitConfig = new UnitConfig(userPreferences);
         return unitConfig.getUrl();
     }
     public void login(){
-        unitConfig = new UnitConfig(userPreferences);
         String text = "{\"login\": \"" + unitConfig.getUserName() +
                 "\", \"password\": \"" + unitConfig.getPassword() + "\"}";
         text = "{\"params\": " + text + "}";
@@ -52,7 +48,6 @@ public class RestAPI {
         }
     }
     public void sendMess(String directive, String mes, String params){
-        unitConfig = new UnitConfig(userPreferences);
         try {
             URL url = new URL(unitConfig.getUrl() + mes);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -86,7 +81,6 @@ public class RestAPI {
         }
     }
     public void get(String mes) {
-        if (unitConfig == null) unitConfig = new UnitConfig(userPreferences);
         try {
             URL url = new URL(unitConfig.getUrl() + mes);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();

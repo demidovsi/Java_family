@@ -7,9 +7,9 @@ import java.nio.file.Paths;
 import java.util.prefs.Preferences;
 
 public class UnitConfig {
-    public static String currentNameConfig;  // имя текущей конфигурации
-    private String url, userName, password, schemaName, infoCode;
-    private int intervalConnection;
+    static String currentNameConfig;  // имя текущей конфигурации
+    static String url, userName, password, schemaName, infoCode;
+    static int intervalConnection;
     public UnitConfig(Preferences user)
     {
         currentNameConfig = user.get("current_config", "Домашняя база");

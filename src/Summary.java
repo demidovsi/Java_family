@@ -180,9 +180,9 @@ public class Summary extends PatternForm {
             exist = false;
             int index = intervals.getSelectedIndex();
             switch (index) {
-                case 0 -> current.setText(languages.getText("hist", 8, "Сегодня"));
-                case 1 -> current.setText(languages.getText("one", 7, "Текущий месяц"));
-                case 2 -> current.setText(languages.getText("one", 8, "Текущий год"));
+                case 0: {current.setText(languages.getText("hist", 8, "Сегодня")); break;}
+                case 1: {current.setText(languages.getText("one", 7, "Текущий месяц")); break;}
+                case 2: {current.setText(languages.getText("one", 8, "Текущий год")); break;}
             }
 
             index = chooseMonth.getSelectedIndex();
@@ -221,25 +221,28 @@ public class Summary extends PatternForm {
         String txt = "";
         SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
         switch (index) {
-            case 0 -> {  // сутки
+            case 0 : {  // сутки
                 Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), (Integer) spinnerDay.getValue());
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.DAY_OF_MONTH, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
+                break;
             }
-            case 1 -> {  // месяц
+            case 1 : {  // месяц
                 result = result + "_month";
                 Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), 1);
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.MONTH, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
+                break;
             }
-            case 2 -> {  // Год
+            case 2 : {  // Год
                 result = result + "_year";
                 Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), 0, 1);
                 txt = "'" + formatDate.format(calendar1.getTime()) + "'";
                 calendar1.add(Calendar.YEAR, 1);
                 txt = txt + ",'" + formatDate.format(calendar1.getTime()) + "'";
+                break;
             }
         }
         result = result + "?text=" + txt;
@@ -250,9 +253,9 @@ public class Summary extends PatternForm {
         int index = intervals.getSelectedIndex();
         Calendar calendar1 = new GregorianCalendar((Integer) spinnerYear.getValue(), chooseMonth.getSelectedIndex(), (Integer) spinnerDay.getValue());
         switch (index) {
-            case 0 ->  calendar1.add(Calendar.DAY_OF_MONTH, value);
-            case 1 ->  calendar1.add(Calendar.MONTH, value);
-            case 2 ->  calendar1.add(Calendar.YEAR, value);
+            case 0 :  {calendar1.add(Calendar.DAY_OF_MONTH, value); break;}
+            case 1 :  {calendar1.add(Calendar.MONTH, value); break;}
+            case 2 :  {calendar1.add(Calendar.YEAR, value); break;}
         }
         exist = false;
         year.setValue(calendar1.get(Calendar.YEAR));
@@ -283,9 +286,9 @@ public class Summary extends PatternForm {
         Float value;
         String key;
         switch (index) {
-            case 0 ->  l = 2;
-            case 1 ->  l = 2 + (Integer) spinnerDay.getMaximum();
-            case 2 ->  l = 2 + 12;
+            case 0 :  {l = 2; break;}
+            case 1 :  {l = 2 + (Integer) spinnerDay.getMaximum(); break;}
+            case 2 :  {l = 2 + 12; break; }
         }
         String[] arr = new String[l];
         arr[0] = param.getString("cat_name");
@@ -341,25 +344,26 @@ public class Summary extends PatternForm {
             int index = intervals.getSelectedIndex();
             String schemaName = new UnitConfig(userPrefs).getSchemaName();
             String mes = getTextRequest(index, schemaName);
-            RestAPI restAPI = new RestAPI(userPrefs);
+            RestAPI restAPI = new RestAPI();
             restAPI.get(mes);
             if (restAPI.isOk()) {
                 masData = new JSONArray("[]");
                 JSONArray units = new JSONArray(restAPI.getResponseMessage());
                 switch (index) {
-                    case 0 -> { rootModel.setColumnCount(2); }
-                    case 1 -> { rootModel.setColumnCount(2 + (Integer) spinnerDay.getMaximum()); }
-                    case 2 -> { rootModel.setColumnCount(2 + 12);}
+                    case 0 : { rootModel.setColumnCount(2); break;}
+                    case 1 : { rootModel.setColumnCount(2 + (Integer) spinnerDay.getMaximum()); break;}
+                    case 2 : { rootModel.setColumnCount(2 + 12); break;}
                 }
                 for (int i=0; i < units.length(); i++) {
                     switch (index) {
-                        case 0 -> { masData.put(makeData(units.getJSONObject(i), 0, 0));}
-                        case 1-> {
+                        case 0 : { masData.put(makeData(units.getJSONObject(i), 0, 0)); break;}
+                        case 1: {
                             for (int j=1; j <= (Integer) spinnerDay.getMaximum(); j++)
                                 table.getColumnModel().getColumn(j + 1).setHeaderValue(Integer.toString(j));
                             masData.put(makeData(units.getJSONObject(i), 8, 31));
+                            break;
                         }
-                        case 2 -> { masData.put(makeData(units.getJSONObject(i), 8, 12)); }
+                        case 2 : { masData.put(makeData(units.getJSONObject(i), 8, 12)); break;}
                     }
                 }
 //                System.out.println(Integer.toString(masData.length()));

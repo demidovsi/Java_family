@@ -19,8 +19,7 @@ public class OneDay  extends PatternForm {
     DatePicker datePicker;
     static JLabel labelSummary = new JLabel("Summary");
     Double summa = 0d;
-    JPanel gui, panelUnit, panelTable;
-    JScrollPane panelUnitScroll;
+    JPanel gui, panelTable;
     JButton refresh, before, after, current, create, delete, save;
      static JLabel labelCount = new JLabel("Count");
     private JTable table;
@@ -131,10 +130,6 @@ public class OneDay  extends PatternForm {
         gui.add(panelTable);
         add(gui);
         setLayout(new GridLayout(1, 1));
-//        self.addActionListener((e) ->
-//        {
-//            if (e.getID() == Event.F7) tableChanged();  // смена языка
-//        });
     }
 
     public void changeLanguage() {
@@ -157,24 +152,9 @@ public class OneDay  extends PatternForm {
         // формирование текста запроса информации в зависимости от интервала и его характеристик
         String stLocalDate = datePicker.getDate().toString();
         String stLocalDateNext = datePicker.getDate().plusDays(1).toString();
-        String result = "function/" + schemaName + "/p_history_rashod?text='" + stLocalDate + "','" + stLocalDateNext + "'";
-        result = "v1/content/" + schemaName + "/rashod?where=dt>='" + stLocalDate + "'+and+dt<'" + stLocalDateNext + "'";
-//        result = "v1/content/" + schemaName + "/rashod?where=dt>='" + stLocalDate + "'";
-        return result;
-    }
-    private JSONObject makeData(JSONObject data, int iFrom, int count) {
-        JSONObject result = new JSONObject();
-        result.put("cat_name", data.get("1"));
-        result.put("money", data.get("2"));
-        result.put("comment", data.get("3"));
-        result.put("guid", data.get("4"));
-        result.put("guid_parent", data.get("5"));
-        result.put("lev", data.get("6"));
-        result.put("dt", data.get("7"));
-        result.put("id", data.get("8"));
-        for (int i=1; i <= count; i++) result.put(Integer.toString(i), data.get(Integer.toString(iFrom + i)));
-//        System.out.println(result);
-        return result;
+//        String result = "function/" + schemaName + "/p_history_rashod?text='" + stLocalDate + "','" + stLocalDateNext + "'";
+//        String result = "v1/content/" + schemaName + "/rashod?where=dt>='" + stLocalDate + "'+and+dt<'" + stLocalDateNext + "'";
+        return "v1/content/" + schemaName + "/rashod?where=dt>='" + stLocalDate + "'+and+dt<'" + stLocalDateNext + "'";
     }
     private int getCatId(String catName) {
         for (int i=0; i < categories.length(); i++) {
@@ -200,7 +180,7 @@ public class OneDay  extends PatternForm {
         exist = false;
         String schemaName = new UnitConfig(userPrefs).getSchemaName();
         String mes = getTextRequest(schemaName);
-        RestAPI restAPI = new RestAPI(userPrefs);
+        RestAPI restAPI = new RestAPI();
         restAPI.get(mes);
         if (restAPI.isOk()) {
             JSONArray units = new JSONArray(restAPI.getResponseMessage());
@@ -226,7 +206,7 @@ public class OneDay  extends PatternForm {
                 try {
                         String[] row = new String[10];
                         Double money;
-                        if (unit.isNull("money")) money = 0d; else money = unit.getDouble("money");
+                        money = unit.isNull("money") ? 0d : unit.getDouble("money");
                         summa = summa + money;
                         row[2] = unit.getString("name_cat_id");
                         row[8] = row[2];
@@ -248,6 +228,7 @@ public class OneDay  extends PatternForm {
         try {
             table.changeSelection(0, 0, false, false);
         } catch (Exception err) {
+            System.out.println("OneDay.refresh: " + err);
         }
         setSaveEnabled();
     }
@@ -270,11 +251,12 @@ public class OneDay  extends PatternForm {
             if (countRow !=0) {
                 int[] selectedRows = table.getSelectedRows();
                 selectedId = Integer.parseInt((String) rootModel.getValueAt(selectedRows[0], 4));
-                for (int selIndex : selectedRows) {
-                    defineEnabled(true);
-                    break;
-                }
-            }
+//                for (int selIndex : selectedRows) {
+//                    defineEnabled(true);
+//                    break;
+//            }
+            defineEnabled(true);
+        }
         }
     }
     public void setSelectedRow(int id, String newDate) {
@@ -313,7 +295,7 @@ public class OneDay  extends PatternForm {
                 }
                 if (index == 6)
                 {
-                    if (rootModel.getValueAt(row, index - 6) != rootModel.getValueAt(row, index)) { st = "Change"; break; }
+                    if (rootModel.getValueAt(row, 0) != rootModel.getValueAt(row, index)) { st = "Change"; break; }
                 }
             }
             rootModel.setValueAt(st, row, 5);
@@ -333,7 +315,7 @@ public class OneDay  extends PatternForm {
     }
     private JComboBox loadCategory(){
         JComboBox bx = new JComboBox();
-        RestAPI restAPI = new RestAPI(userPrefs);
+        RestAPI restAPI = new RestAPI();
         restAPI.get("v1/content/" + new UnitConfig(userPrefs).getSchemaName() +"/categor?column_order=sh_name");
         if (restAPI.isOk()) {
             categories = new JSONArray(restAPI.getResponseMessage());
@@ -369,7 +351,6 @@ public class OneDay  extends PatternForm {
     public static class SpinnerEditor extends DefaultCellEditor
     {
         public int aRow = -1;
-        JTable aTable;
         JSpinner sp;
         DefaultEditor defaultEditor;
         JTextField text;
@@ -399,7 +380,7 @@ public class OneDay  extends PatternForm {
             return sp.getValue();
         }
         private void sendMessage() {
-            ActionEvent event = new ActionEvent(parentForm, Event.F7, "changeValue");
+            ActionEvent event = new ActionEvent(parentForm, -1001, "changeValue");
             ActionListener[] listeners;
             listeners = parentForm.getActionListeners();
             listeners[0].actionPerformed(event);
@@ -408,7 +389,7 @@ public class OneDay  extends PatternForm {
     private void saveClick() {
         JSONObject result = new JSONObject();
         JSONArray values = new JSONArray();
-        RestAPI restAPI = new RestAPI(userPrefs);
+        RestAPI restAPI = new RestAPI();
         restAPI.login();
         if (restAPI.isOk()) {
             JSONObject stObject = new JSONObject(restAPI.getResponseMessage());
@@ -440,11 +421,11 @@ public class OneDay  extends PatternForm {
             params.put("token", token);
 
             restAPI.sendMess("PUT", "v1/objects", params.toString());
-            if (restAPI.isOk())  refresh();
+            if (restAPI.isOk()) refresh();
             else {
                 Object[] options = { "Ok" };
                 JOptionPane.showOptionDialog(
-                        this, new UnitConfig(userPrefs).getUrl() + "\n" +
+                        this, restAPI.getUrl() + "\n" +
                         "PUT v1/objects\n" + restAPI.getResponseCode() + " " + restAPI.getResponseMessage(),
                         "Ошибка записи в БД",
                         JOptionPane.OK_OPTION,
@@ -455,7 +436,7 @@ public class OneDay  extends PatternForm {
     }
     private int defineObjectMdmId(){
         String schemaName = new UnitConfig(userPrefs).getSchemaName();
-        RestAPI restAPI = new RestAPI(userPrefs);
+        RestAPI restAPI = new RestAPI();
         String mes = "v1/MDM/objects?usl=app_code='" + schemaName + "'+and+code='rashod'";
         restAPI.get(mes);
         if (restAPI.isOk()) {
@@ -465,7 +446,7 @@ public class OneDay  extends PatternForm {
         else {
             Object[] options = { "Ok" };
             JOptionPane.showOptionDialog(
-                    this, new UnitConfig(userPrefs).getUrl() + "\n" +
+                    this, restAPI.getUrl() + "\n" +
                             "GET " + mes + "\n" + restAPI.getResponseCode() + " " + restAPI.getResponseMessage(),
                     "Ошибка чтения из БД",
                     JOptionPane.OK_OPTION,
@@ -486,7 +467,7 @@ public class OneDay  extends PatternForm {
             table.changeSelection(row, 0, false, false);
             exist = true;
         } else {
-            RestAPI restAPI = new RestAPI(userPrefs);
+            RestAPI restAPI = new RestAPI();
             restAPI.login();
             if (restAPI.isOk()) {
                 String token = new JSONObject(restAPI.getResponseMessage()).getString("accessToken");
@@ -507,7 +488,7 @@ public class OneDay  extends PatternForm {
                         if (restAPI.isOk()) refresh();
                         else {
                             JOptionPane.showOptionDialog(
-                                    this, new UnitConfig(userPrefs).getUrl() + "\n" +
+                                    this, restAPI.getUrl() + "\n" +
                                             "DELETE v1/object\n" + restAPI.getResponseCode() + " " + restAPI.getResponseMessage(),
                                     "Ошибка записи в БД",
                                     JOptionPane.OK_OPTION,
